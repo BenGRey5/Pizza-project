@@ -1,9 +1,11 @@
-document.addEventListener('DOMContentLoaded', function() {
-    function Pizza(size, toppings) {
-        this.size = size;
-        this.toppings = toppings;
-    }
+// Business Logic
+function Pizza(size, toppings) {
+    this.size = size;
+    this.toppings = toppings;
+    this.price = 0; // Initialize price property
+}
 
+Pizza.prototype.calculateTotalCost = function () {
     const toppings = {
         Pepperoni: 0.50,
         Pineapple: 0.25,
@@ -21,23 +23,28 @@ document.addEventListener('DOMContentLoaded', function() {
         Large: 7
     };
 
-    Pizza.prototype.calculateTotalCost = function() {
-        let totalCost = size[this.size];
+    this.price = size[this.size];
 
-        this.toppings.forEach(function(topping) {
-            totalCost += toppings[topping];
-        });
-        return totalCost;
-    }
+    this.toppings.forEach(function (topping) {
+        this.price += toppings[topping];
+    }, this); // Pass 'this' to maintain the correct context
 
+    return this.price;
+}
+
+// UI Logic
+document.addEventListener('DOMContentLoaded', function () {
     const selectedToppings = []
-
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     const sizeRadios = document.querySelectorAll('input[name="size"]');
     const priceDisplay = document.getElementById("priceDisplay");
 
-    checkboxes.forEach(function(checkbox) {
-        checkbox.addEventListener("change", function(){
+    function updatePriceDisplay(pizza) {
+        priceDisplay.textContent = "Price: $" + pizza.price.toFixed(2);
+    }
+
+    checkboxes.forEach(function (checkbox) {
+        checkbox.addEventListener("change", function () {
             if (checkbox.checked) {
                 selectedToppings.push(checkbox.value);
             } else {
@@ -50,20 +57,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const selectedSizeInput = document.querySelector('input[name="size"]:checked');
             const selectedSize = selectedSizeInput ? selectedSizeInput.value : '';
             const pizza = new Pizza(selectedSize, selectedToppings);
-            const totalCost = pizza.calculateTotalCost();
-            priceDisplay.textContent = "Price: $" + totalCost.toFixed(2);
+            pizza.calculateTotalCost();
+            updatePriceDisplay(pizza);
         });
     });
 
-    sizeRadios.forEach(function(radio) {
-        radio.addEventListener("change", function() {
+    sizeRadios.forEach(function (radio) {
+        radio.addEventListener("change", function () {
             const selectedSizeInput = document.querySelector('input[name="size"]:checked');
             const selectedSize = selectedSizeInput ? selectedSizeInput.value : '';
             const pizza = new Pizza(selectedSize, selectedToppings);
-            const totalCost = pizza.calculateTotalCost();
-            priceDisplay.textContent = "Price: $" + totalCost.toFixed(2);
+            pizza.calculateTotalCost();
+            updatePriceDisplay(pizza);
         });
     });
 });
+
 
 
